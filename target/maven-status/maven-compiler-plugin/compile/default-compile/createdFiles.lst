@@ -1,2 +1,4 @@
+com/nats/Replier.class
+com/nats/Requester.class
 com/nats/Publisher.class
 com/nats/Subscriber.class
