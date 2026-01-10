@@ -138,7 +138,7 @@ flowchart LR
 
 ---
 
-## CLI POC
+## CLI NATS Core POC
 
 ---
 
