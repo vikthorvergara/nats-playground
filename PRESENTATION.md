@@ -24,6 +24,37 @@ Lightweight messaging system writen in Go, built for cloud-native and edge compu
 
 ---
 
+## Core Concepts
+
+### Subjects
+
+Hierarchical addressing for messages using dot-separated tokens.
+
+```
+orders.created       # specific subject
+orders.*             # wildcard: matches orders.created, orders.updated
+orders.>             # multi-level: matches orders.us.created, orders.eu.updated
+```
+
+### Messaging Patterns
+
+| Pattern | Description | Use Case |
+|---------|-------------|----------|
+| **Pub/Sub** | One-to-many broadcast | Event notifications, logs |
+| **Request/Reply** | Synchronous RPC | Service-to-service calls |
+| **Queue Groups** | Load-balanced delivery | Work distribution |
+
+### JetStream Concepts
+
+| Concept | Description |
+|---------|-------------|
+| **Stream** | Persistent storage for messages on subjects |
+| **Consumer** | Cursor tracking read position in a stream |
+| **Durable** | Consumer state survives restarts |
+| **Ack** | Client confirms message processing |
+
+---
+
 ## Architecture
 
 **Two-Layer Design:**
@@ -58,7 +89,21 @@ flowchart LR
 
 ---
 
-## NATS vs. Alternatives
+## NATS vs Kafka vs RabbitMQ
+
+|  | NATS | Kafka | RabbitMQ |
+|--|------|-------|----------|
+| **Footprint** | 20MB binary | 64-128GB RAM | 4GB+ RAM |
+| **Dependencies** | None | JVM + KRaft | Erlang VM |
+| **Latency** | Microseconds | Milliseconds | Milliseconds |
+| **Persistence** | Optional (JetStream) | Always (log-based) | Always (queues) |
+| **Request/Reply** | Native | Manual | Manual |
+| **Message Replay** | JetStream | Native | Limited |
+| **Best For** | Microservices, IoT, Edge | Event streaming, Analytics | Complex routing |
+
+---
+
+## Detailed Comparison
 
 ### Resource Requirements (from official docs)
 
@@ -138,7 +183,28 @@ flowchart LR
 
 ---
 
-## CLI NATS Core POC
+## Pros
+
+- **Performance**: Microsecond latency, millions msg/sec
+- **Simplicity**: Single binary, zero dependencies, runs on Raspberry Pi
+- **Patterns**: Pub/Sub, Request/Reply, Queue Groups built-in
+- **Flexibility**: Core (fire-and-forget) + JetStream (persistence) in one system
+- **Operations**: No ZooKeeper, no Erlang, minimal tuning
+
+---
+
+## Cons
+
+- **Ecosystem**: Smaller than Kafka/RabbitMQ (fewer connectors, integrations)
+- **Persistence**: JetStream is newer; Kafka better for massive log retention
+- **Semantics**: At-least-once max; exactly-once requires app-level idempotency
+- **Tooling**: Observability/tracing requires more manual setup
+- **Learning curve**: Multi-region (superclusters/leaf nodes) adds complexity
+
+---
+
+## *WIP*: Live code POC or CLI POC?
+
 
 ---
 
@@ -151,18 +217,6 @@ flowchart LR
 ✓ **Operational Simplicity:** Single binary, no ZooKeeper, minimal resources
 
 ---
-
-## Try It Yourself
-
-**Run the POCs:**
-
-```bash
-docker compose up -d
-
-mvn exec:java -Dexec.mainClass="com.nats.Publisher"
-mvn exec:java -Dexec.mainClass="com.nats.QueueWorker"
-mvn exec:java -Dexec.mainClass="com.nats.JetStreamPublisher"
-```
 
 **Resources:**
 - NATS Docs: https://docs.nats.io
