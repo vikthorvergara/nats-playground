@@ -1,0 +1,5 @@
+/target
+
+# Go binaries
+go-nats-demo/go-nats-demo
+go-nats-demo/go-nats-demo.exe
